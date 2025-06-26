@@ -1,0 +1,330 @@
+body,
+.dynamic-content, .dashboard-main {
+  background: #F5F7FA;
+  color: #2E2E2E;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem 2rem 1rem;
+}
+
+.dashboard-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #1F3B4D;
+  margin-bottom: 2rem;
+  letter-spacing: 1px;
+}
+
+.dashboard-cards {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(31, 59, 77, 0.10);
+  padding: 1.5rem 2.2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  min-width: 220px;
+  transition: box-shadow 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 8px 32px rgba(31, 59, 77, 0.16);
+}
+
+.card-icon {
+  font-size: 2.2rem;
+  color: #4F8EF7;
+  background: #f1f7ff;
+  border-radius: 50%;
+  padding: 0.7rem;
+  margin-right: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-icon.ventas {
+  color: #F39C12;
+  background: #FFF7E6;
+}
+.card-icon.mes {
+  color: #27AE60;
+  background: #E8F8F5;
+}
+.card-icon.usuarios {
+  color: #2980B9;
+  background: #EBF5FB;
+}
+
+.card-label {
+  font-size: 1.1rem;
+  color: #888;
+}
+
+.card-value {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #222;
+  margin-top: 0.5rem;
+}
+
+.dashboard-section {
+  background: #FFFFFF;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(31, 59, 77, 0.10);
+  margin-bottom: 2.5rem;
+  padding: 2rem 2.2rem 2.2rem 2.2rem;
+}
+
+.section-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #1F3B4D;
+  margin-bottom: 1.2rem;
+}
+
+.productos-list, .actividades-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.productos-list li, .actividades-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid #F5F7FA;
+  font-size: 1rem;
+  color: #2E2E2E;
+}
+
+.producto-nombre {
+  font-weight: 500;
+  color: #1F3B4D;
+}
+
+.producto-vendidos {
+  color: #2ECC71;
+  font-weight: 500;
+  margin-left: 1.2rem;
+}
+
+.producto-stock {
+  color: #E67E22;
+  font-weight: 500;
+  margin-left: 1.2rem;
+}
+
+.actividad-fecha {
+  color: #888;
+  font-size: 0.95rem;
+  margin-right: 1.2rem;
+}
+
+.actividad-desc {
+  color: #222;
+}
+
+.pie-chart-container {
+  max-width: 420px;
+  min-width: 260px;
+  height: 340px;
+  margin: 0 auto 1.5rem auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(31, 59, 77, 0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.2rem 1.2rem 1.2rem 1.2rem;
+  position: relative;
+  transition: box-shadow 0.2s;
+}
+
+.pie-chart-container:hover {
+  box-shadow: 0 8px 32px rgba(31, 59, 77, 0.16);
+}
+
+.no-data-msg {
+  width: 100%;
+  text-align: center;
+  color: #888;
+  font-size: 1.1rem;
+  padding: 2rem 0;
+}
+
+/* Gráfico de barras */
+.bar-chart-container {
+  max-width: 700px;
+  min-width: 260px;
+  height: 340px;
+  margin: 0 auto 1.5rem auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(31, 59, 77, 0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.2rem 1.2rem 1.2rem 1.2rem;
+  position: relative;
+  transition: box-shadow 0.2s;
+}
+.bar-chart-container:hover {
+  box-shadow: 0 8px 32px rgba(31, 59, 77, 0.16);
+}
+@media (max-width: 900px) {
+  .dashboard-cards {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .dashboard-section {
+    padding: 1.2rem 0.7rem;
+  }
+  .bar-chart-container { max-width: 98vw; }
+}
+@media (max-width: 600px) {
+  .dashboard-main {
+    padding: 1rem 0.2rem;
+  }
+  .pie-chart-container {
+    max-width: 98vw;
+    min-width: unset;
+    height: 220px;
+    padding: 1rem 0.2rem;
+  }
+  .bar-chart-container { height: 220px; padding: 1rem 0.2rem; }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #F5F7FA;
+}
+::-webkit-scrollbar-thumb {
+  background: #3498DB;
+  border-radius: 8px;
+}
+
+.ver-todas-btn {
+  margin-top: 1rem;
+  background: #4f8cff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.ver-todas-btn:hover {
+  background: #2563eb;
+}
+
+.dashboard-background-decor {
+  position: fixed;
+  width: 120vw;
+  height: 120vw;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -60%);
+  background: radial-gradient(circle at 60% 40%, #3498db22 0%, #1f3b4d11 80%, transparent 100%);
+  z-index: 0;
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+.dashboard-header.glass {
+  background: rgba(255,255,255,0.85);
+  border-radius: 22px;
+  box-shadow: 0 8px 32px 0 rgba(31,59,77,0.13);
+  backdrop-filter: blur(8px) saturate(1.2);
+  border: 1.5px solid rgba(52,152,219,0.10);
+  padding: 2rem 2.5rem 1.5rem 2.5rem;
+  margin-bottom: 2.2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  animation: fadeIn 0.7s;
+  position: relative;
+  z-index: 2;
+}
+.dashboard-header-title {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+.dashboard-header-icon {
+  background: linear-gradient(135deg, #4f8cff 60%, #1f3b4d 100%);
+  color: #fff;
+  border-radius: 50%;
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  box-shadow: 0 2px 12px 0 rgba(52,152,219,0.13);
+  border: 2.5px solid #fff;
+  position: relative;
+  overflow: hidden;
+}
+.dashboard-header-icon::after {
+  content: "";
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  background: linear-gradient(120deg, #fff3 30%, transparent 100%);
+  pointer-events: none;
+}
+.dashboard-desc {
+  color: #4f8cff;
+  font-size: 1.08rem;
+  margin: 0.2rem 0 0 0;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+}
+
+/* Secciones flexibles para productos y actividades */
+.dashboard-sections-flex {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+.dashboard-section.glass {
+  background: rgba(255,255,255,0.92);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px 0 rgba(31,59,77,0.13);
+  backdrop-filter: blur(6px) saturate(1.1);
+  padding: 2.2rem 1.2rem;
+  margin-bottom: 2.5rem;
+  flex: 1 1 340px;
+  min-width: 320px;
+  animation: fadeIn 0.7s;
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 900px) {
+  .dashboard-sections-flex {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+}
