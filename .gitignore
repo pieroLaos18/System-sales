@@ -1,10 +1,9 @@
 # Dependencies
 node_modules/
-*/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-lerna-debug.log*
+pnpm-debug.log*
 
 # Runtime data
 pids
@@ -19,35 +18,14 @@ coverage/
 # nyc test coverage
 .nyc_output
 
-# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
-.grunt
-
-# Bower dependency directory (https://bower.io/)
-bower_components
-
-# node-waf configuration
-.lock-wscript
-
-# Compiled binary addons (https://nodejs.org/api/addons.html)
-build/Release
-
 # Dependency directories
 jspm_packages/
-
-# TypeScript cache
-*.tsbuildinfo
 
 # Optional npm cache directory
 .npm
 
 # Optional eslint cache
 .eslintcache
-
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
 
 # Optional REPL history
 .node_repl_history
@@ -60,7 +38,6 @@ jspm_packages/
 
 # dotenv environment variables file
 .env
-.env.test
 .env.local
 .env.development.local
 .env.test.local
@@ -70,52 +47,57 @@ jspm_packages/
 .cache
 .parcel-cache
 
-# Next.js build output
+# next.js build output
 .next
 
-# Nuxt.js build / generate output
+# nuxt.js build output
 .nuxt
-dist
 
-# Gatsby files
-.cache/
-public
+# vuepress build output
+.vuepress/dist
 
-# Storybook build outputs
-.out
-.storybook-out
+# Serverless directories
+.serverless
 
-# Temporary folders
-tmp/
-temp/
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Vue.js
+dist/
+.vscode/
+.DS_Store
+
+# Logs
+logs
+*.log
+
+# Build outputs
+build/
+dist-ssr/
 
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# Vue.js specific
-dist/
-*.local
-
-# Logs
-logs
-*.log
-
-# OS generated files
-Thumbs.db
-.DS_Store
-
-# Database files (if any)
-*.sqlite
-*.db
-
-# Uploads directory with actual files (keep structure but not files)
+# Uploads (opcional - puedes comentar esta línea si quieres subir las imágenes)
 backend/uploads/*
 !backend/uploads/.gitkeep
+
+# Database files (si tienes archivos de base de datos locales)
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.temp
