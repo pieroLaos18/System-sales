@@ -567,14 +567,14 @@
       </div>
     </transition>
 
-    <!-- Modal Anulación Venta Modernizado -->
+    <!-- Modal Anulación Venta Modernizado y Mejorado -->
     <transition name="modal" appear>
       <div v-if="ventaAAnular" class="modal-overlay" @click.self="cerrarModalAnulacion">
         <div class="modal-container cancel-modal">
           <div class="modal-header">
             <div class="modal-title-section">
               <div class="modal-icon cancel-icon">
-                <i class="fas fa-ban"></i>
+                <i class="fas fa-exclamation-triangle"></i>
               </div>
               <div>
                 <h2>Anular Venta</h2>
@@ -587,43 +587,63 @@
           </div>
           
           <div class="modal-body">
+            <!-- Alerta de advertencia mejorada -->
             <div class="warning-section">
               <div class="warning-card">
                 <i class="fas fa-exclamation-triangle"></i>
                 <div class="warning-content">
-                  <h4>¿Estás seguro de anular esta venta?</h4>
-                  <p>Esta acción no se puede deshacer. La venta será marcada como anulada permanentemente.</p>
+                  <h4>⚠️ ¿Estás seguro de anular esta venta?</h4>
+                  <p>Esta acción es <strong>irreversible</strong> y marcará la venta como anulada permanentemente en el sistema. Una vez confirmada, no podrás revertir esta operación.</p>
                 </div>
               </div>
             </div>
 
-            <!-- Información de la venta -->
+            <!-- Información mejorada de la venta -->
             <div class="sale-info-section">
               <h3 class="section-title">
-                <i class="fas fa-info-circle"></i>
-                Información de la Venta
+                <i class="fas fa-receipt"></i>
+                Detalles de la Venta
               </h3>
               <div class="sale-summary-card">
                 <div class="summary-row">
-                  <span class="label">Cliente:</span>
-                  <span class="value">{{ ventaAAnular.cliente }}</span>
+                  <span class="label">
+                    <i class="fas fa-user"></i>
+                    Cliente:
+                  </span>
+                  <span class="value">{{ ventaAAnular.cliente || 'Cliente general' }}</span>
                 </div>
                 <div class="summary-row">
-                  <span class="label">Fecha:</span>
+                  <span class="label">
+                    <i class="fas fa-calendar-alt"></i>
+                    Fecha:
+                  </span>
                   <span class="value">{{ formatearFecha(ventaAAnular.fecha) }}</span>
                 </div>
                 <div class="summary-row">
-                  <span class="label">Productos:</span>
+                  <span class="label">
+                    <i class="fas fa-shopping-cart"></i>
+                    Productos:
+                  </span>
                   <span class="value">{{ contarProductos(ventaAAnular.productos) }} artículo(s)</span>
                 </div>
+                <div class="summary-row">
+                  <span class="label">
+                    <i class="fas fa-credit-card"></i>
+                    Método de Pago:
+                  </span>
+                  <span class="value">{{ ventaAAnular.metodoPago || 'No especificado' }}</span>
+                </div>
                 <div class="summary-row total">
-                  <span class="label">Total:</span>
+                  <span class="label">
+                    <i class="fas fa-dollar-sign"></i>
+                    Total:
+                  </span>
                   <span class="value">S/ {{ ventaAAnular.total }}</span>
                 </div>
               </div>
             </div>
 
-            <!-- Motivo de anulación -->
+            <!-- Sección de motivo mejorada -->
             <div class="reason-section">
               <h3 class="section-title">
                 <i class="fas fa-comment-alt"></i>
@@ -631,19 +651,20 @@
               </h3>
               <div class="form-group">
                 <label for="motivoAnulacion" class="form-label">
-                  Describe el motivo por el cual se anula esta venta: *
+                  <i class="fas fa-edit"></i>
+                  Describe detalladamente el motivo de la anulación: *
                 </label>
                 <textarea
                   id="motivoAnulacion"
                   v-model="motivoAnulacion"
                   class="form-textarea"
-                  placeholder="Ej: Error en el producto seleccionado, cliente solicitó cancelación, problema con el pago..."
+                  placeholder="Por favor, especifica el motivo de la anulación. Ej: Error en el producto seleccionado, cliente solicitó cancelación, problema con el método de pago, producto defectuoso, etc."
                   rows="4"
                   required
                 ></textarea>
                 <small class="form-help">
                   <i class="fas fa-info-circle"></i>
-                  Este motivo quedará registrado en el sistema para futuras referencias.
+                  Este motivo quedará registrado permanentemente en el historial del sistema para futuras referencias y auditorías.
                 </small>
               </div>
             </div>
@@ -1811,9 +1832,11 @@ export default {
   backdrop-filter: blur(8px);
   z-index: 1000;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 2rem;
+  padding: 1rem;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .modal-container {
@@ -1821,13 +1844,16 @@ export default {
   border-radius: 24px;
   width: 100%;
   max-width: 1000px;
-  max-height: 90vh;
+  max-height: calc(100vh - 2rem);
   overflow: hidden;
   box-shadow: 
     0 25px 50px -12px rgba(0, 0, 0, 0.25),
     0 0 0 1px rgba(255, 255, 255, 0.1);
   transform: translateY(0);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin: 1rem auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-header {
@@ -1893,7 +1919,27 @@ export default {
 .modal-body {
   padding: 0;
   overflow-y: auto;
-  max-height: calc(90vh - 200px);
+  max-height: calc(100vh - 220px);
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .sale-form {
@@ -2511,57 +2557,177 @@ export default {
   font-size: 1.25rem;
 }
 
-/* Estilos para modal de anulación */
+/* Estilos mejorados para modal de anulación */
+.cancel-modal {
+  animation: modalSlideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.cancel-modal .modal-container {
+  max-width: 650px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.1);
+  max-height: calc(100vh - 2rem);
+}
+
+.cancel-modal .modal-body {
+  max-height: calc(100vh - 280px);
+  overflow-y: auto;
+  padding-bottom: 2rem;
+}
+
+.cancel-modal .modal-header {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 50%, #fca5a5 100%);
+  padding: 2rem 2.5rem 1.5rem;
+  border-bottom: 1px solid rgba(220, 38, 38, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.cancel-modal .modal-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #dc2626, #ef4444, #f87171);
+}
+
+.cancel-modal .modal-title-section {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.cancel-modal .cancel-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.8rem;
+  box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3);
+  animation: pulseWarning 2s ease-in-out infinite;
+}
+
+.cancel-modal .modal-title-section h2 {
+  color: #7f1d1d;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.cancel-modal .modal-subtitle {
+  color: #991b1b;
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0 0;
+  font-weight: 500;
+}
+
 .warning-section {
   margin-bottom: 2rem;
+  padding: 0 2.5rem;
 }
 
 .warning-card {
-  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-  border: 1px solid #fecaca;
-  border-radius: 16px;
-  padding: 1.5rem;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 50%, #fecaca 100%);
+  border: 2px solid #fca5a5;
+  border-radius: 20px;
+  padding: 2rem;
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  align-items: flex-start;
+  gap: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(220, 38, 38, 0.1);
+}
+
+.warning-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(220, 38, 38, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(239, 68, 68, 0.05) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .warning-card i {
   color: #dc2626;
-  font-size: 2.5rem;
+  font-size: 3rem;
   flex-shrink: 0;
+  animation: bounce 2s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(220, 38, 38, 0.2));
+}
+
+.warning-content {
+  position: relative;
+  z-index: 1;
 }
 
 .warning-content h4 {
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #7f1d1d;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.3;
 }
 
 .warning-content p {
   color: #991b1b;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 0.95rem;
 }
 
 .sale-info-section {
   margin-bottom: 2rem;
+  padding: 0 2.5rem;
 }
 
 .sale-summary-card {
-  background: #f8fafc;
-  border-radius: 16px;
-  padding: 1.5rem;
-  border: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-radius: 20px;
+  padding: 2rem;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.sale-summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #6366f1, #8b5cf6);
 }
 
 .sale-summary-card .summary-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(203, 213, 225, 0.6);
+  transition: all 0.3s ease;
+}
+
+.sale-summary-card .summary-row:hover {
+  background: rgba(59, 130, 246, 0.05);
+  margin: 0 -1rem;
+  padding: 1rem;
+  border-radius: 12px;
 }
 
 .sale-summary-card .summary-row:last-child {
@@ -2569,32 +2735,226 @@ export default {
 }
 
 .sale-summary-card .summary-row.total {
-  border-top: 2px solid #e2e8f0;
-  padding-top: 1rem;
-  margin-top: 0.5rem;
+  border-top: 2px solid #cbd5e1;
+  padding-top: 1.25rem;
+  margin-top: 0.75rem;
   font-weight: 700;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  margin: 0.75rem -1rem 0;
+  padding: 1.25rem 1rem;
+  border-radius: 12px;
 }
 
 .sale-summary-card .label {
   font-weight: 600;
   color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .sale-summary-card .value {
-  font-weight: 500;
+  font-weight: 600;
   color: #1f2937;
 }
 
+.sale-summary-card .total .label,
+.sale-summary-card .total .value {
+  color: #1e40af;
+  font-size: 1.1rem;
+}
+
 .reason-section {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
+  padding: 0 2.5rem 1rem 2.5rem;
 }
 
 .form-label {
   display: block;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #374151;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  resize: vertical;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+}
+
+.form-textarea::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.form-help {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 8px;
+  border-left: 3px solid #3b82f6;
+}
+
+.cancel-modal .modal-footer {
+  padding: 2rem 2.5rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-top: 1px solid #cbd5e1;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.cancel-modal .btn-secondary {
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+  border: 2px solid #e2e8f0;
+  color: #64748b;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cancel-modal .btn-secondary:hover {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cancel-modal .btn-danger {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  border: 2px solid #dc2626;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.cancel-modal .btn-danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
+}
+
+.cancel-modal .btn-danger:disabled {
+  background: linear-gradient(135deg, #9ca3af 0%, #d1d5db 100%);
+  border-color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Animaciones */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes pulseWarning {
+  0%, 100% {
+    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3);
+  }
+  50% {
+    box-shadow: 0 12px 30px rgba(220, 38, 38, 0.5);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-8px);
+  }
+  60% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Responsive para modal de anulación */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 0.5rem;
+  }
+  
+  .cancel-modal .modal-container {
+    max-width: 95vw;
+    margin: 0.5rem;
+    max-height: calc(100vh - 1rem);
+  }
+  
+  .cancel-modal .modal-body {
+    max-height: calc(100vh - 250px);
+  }
+  
+  .cancel-modal .modal-header,
+  .warning-section,
+  .sale-info-section,
+  .reason-section {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  
+  .reason-section {
+    margin-bottom: 2rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .cancel-modal .modal-footer {
+    padding: 1.5rem;
+    flex-direction: column;
+  }
+  
+  .cancel-modal .modal-footer button {
+    width: 100%;
+  }
+  
+  .warning-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .cancel-modal .modal-title-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
 }
 </style>
 
