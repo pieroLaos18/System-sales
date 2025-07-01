@@ -47,9 +47,10 @@ const deleteUser = async (req, res) => {
 
 const updateActivity = async (req, res) => {
   try {
-    await userService.updateLastLogin(req.user.id);
+    await userService.updateActivity(req.user.id);
     res.json({ success: true });
   } catch (err) {
+    console.error('❌ Error al actualizar actividad del usuario:', err.message);
     res.status(500).json({ error: 'Error al actualizar actividad' });
   }
 };
@@ -122,17 +123,19 @@ const updateUserProfile = async (req, res) => {
     }
 
     await pool.query(
-  'UPDATE users SET nombre = ?, correo_electronico = ?, imagen = ? WHERE id = ?',
-  [name, email, imagePath || null, id]
-);
-
-
+      'UPDATE users SET nombre = ?, correo_electronico = ?, imagen = ? WHERE id = ?',
+      [name, email, imagePath || null, id]
+    );
+    
     res.json({
       success: true,
       name,
       email,
-      image: imagePath || req.user?.image || null
+      image: imagePath
+        ? `http://localhost:${process.env.PORT || 3001}${imagePath}`
+        : null
     });
+
   } catch (err) {
     console.error('❌ Error al actualizar perfil:', err.message);
     res.status(500).json({ error: 'Error al actualizar perfil' });

@@ -1,0 +1,103 @@
+/* Reset CSS global completo para eliminar bordes, márgenes y líneas blancas */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  border: none;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px; /* Base font size */
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  width: 100%;
+  height: 100%;
+  /* Prevenir scroll horizontal */
+  overflow-x: hidden;
+  /* Ajuste para iOS Safari */
+  -webkit-text-size-adjust: 100%;
+  /* Eliminar espaciado por defecto en algunos navegadores */
+  line-height: 1;
+}
+
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  /* Soporte para dispositivos móviles con viewport dinámico */
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
+  overflow-y: auto;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Eliminar cualquier línea o espaciado por defecto */
+  line-height: 1.2;
+  /* Forzar que no haya espaciado superior */
+  position: relative;
+}
+
+#app {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  width: 100vw;
+  height: auto;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  /* Asegurar que no haya espacios adicionales */
+  display: block;
+  position: fixed;
+  overflow: auto;
+}
+
+/* Resetear navegadores específicos */
+@supports (-webkit-appearance: none) {
+  /* Safari específico */
+  html, body, #app {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+/* Edge/IE específico */
+@supports (-ms-ime-align: auto) {
+  html, body, #app {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+/* Responsive font sizes */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 1200px) {
+  html {
+    font-size: 18px;
+  }
+}
+
+/* Eliminar outlines por defecto pero mantener accesibilidad */
+*:focus {
+  outline: none;
+}
+
+/* Mantener focus visible para accesibilidad cuando se usa teclado */
+*:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}

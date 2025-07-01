@@ -15,8 +15,7 @@ export default {
   name: 'App',
   data() {
     return {
-      // Tema actual (light/dark)
-      theme: 'light',
+
     };
   },
   computed: {

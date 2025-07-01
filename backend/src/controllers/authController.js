@@ -56,6 +56,7 @@ const login = async (req, res) => {
         name: user.nombre,
         email: user.correo_electronico,
         rol: user.rol,
+        image: user.imagen || null,
       },
     });
   } catch (err) {

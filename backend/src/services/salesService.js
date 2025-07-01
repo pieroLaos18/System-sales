@@ -36,22 +36,175 @@ async function getSalesSummary() {
   return { hoy: hoy[0].hoy, mes: mes[0].mes };
 }
 
-// Obtener ventas por día de la semana (últimos 7 días o semana anterior)
-async function getSalesByDay(startInterval, endInterval) {
+// Obtener ventas por día de los últimos días
+async function getSalesByDay(days = 7) {
+  try {
+    // Primero vamos a ver qué datos hay realmente en la tabla
+    const [totalVentas] = await pool.query(
+      `SELECT COUNT(*) as total, 
+              MIN(fecha) as fecha_min, 
+              MAX(fecha) as fecha_max,
+              SUM(total) as suma_total
+       FROM ventas WHERE anulada = 0`
+    );
+    
+    console.log('� Estadísticas generales:', {
+      totalVentas: totalVentas[0].total,
+      fechaMin: totalVentas[0].fecha_min,
+      fechaMax: totalVentas[0].fecha_max,
+      sumaTotal: totalVentas[0].suma_total
+    });
+
+    // Consulta simplificada para ver todas las ventas recientes
+    const [ventasRecientes] = await pool.query(
+      `SELECT 
+         DATE_FORMAT(fecha, '%Y-%m-%d') as fecha_formateada,
+         fecha,
+         total,
+         cliente,
+         anulada
+       FROM ventas 
+       WHERE anulada = 0
+       ORDER BY fecha DESC 
+       LIMIT 10`
+    );
+    
+    console.log('📊 Ventas recientes (muestra):', ventasRecientes);
+
+    // Ahora la consulta principal con formato de fecha corregido
+    const [rows] = await pool.query(
+      `SELECT 
+         DATE_FORMAT(fecha, '%Y-%m-%d') as fecha,
+         CASE DAYOFWEEK(fecha)
+           WHEN 1 THEN 'Domingo'
+           WHEN 2 THEN 'Lunes' 
+           WHEN 3 THEN 'Martes'
+           WHEN 4 THEN 'Miércoles'
+           WHEN 5 THEN 'Jueves'
+           WHEN 6 THEN 'Viernes'
+           WHEN 7 THEN 'Sábado'
+         END as dia,
+         SUM(total) as total,
+         COUNT(*) as cantidad_ventas
+       FROM ventas
+       WHERE DATE(fecha) >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+         AND anulada = 0
+       GROUP BY 
+         DATE(fecha),
+         DATE_FORMAT(fecha, '%Y-%m-%d'),
+         CASE DAYOFWEEK(fecha)
+           WHEN 1 THEN 'Domingo'
+           WHEN 2 THEN 'Lunes' 
+           WHEN 3 THEN 'Martes'
+           WHEN 4 THEN 'Miércoles'
+           WHEN 5 THEN 'Jueves'
+           WHEN 6 THEN 'Viernes'
+           WHEN 7 THEN 'Sábado'
+         END
+       ORDER BY fecha DESC`,
+      [days]
+    );
+    
+    console.log('📈 Resultado consulta principal:', rows);
+    
+    // Si no hay datos en el rango específico, mostrar las últimas ventas agrupadas por día
+    if (rows.length === 0) {
+      console.log('⚠️ No hay ventas en los últimos', days, 'días, obteniendo últimas ventas...');
+      
+      const [lastSales] = await pool.query(
+        `SELECT 
+           DATE_FORMAT(fecha, '%Y-%m-%d') as fecha,
+           CASE DAYOFWEEK(fecha)
+             WHEN 1 THEN 'Domingo'
+             WHEN 2 THEN 'Lunes' 
+             WHEN 3 THEN 'Martes'
+             WHEN 4 THEN 'Miércoles'
+             WHEN 5 THEN 'Jueves'
+             WHEN 6 THEN 'Viernes'
+             WHEN 7 THEN 'Sábado'
+           END as dia,
+           SUM(total) as total,
+           COUNT(*) as cantidad_ventas
+         FROM ventas
+         WHERE anulada = 0
+         GROUP BY 
+           DATE(fecha),
+           DATE_FORMAT(fecha, '%Y-%m-%d'),
+           CASE DAYOFWEEK(fecha)
+             WHEN 1 THEN 'Domingo'
+             WHEN 2 THEN 'Lunes' 
+             WHEN 3 THEN 'Martes'
+             WHEN 4 THEN 'Miércoles'
+             WHEN 5 THEN 'Jueves'
+             WHEN 6 THEN 'Viernes'
+             WHEN 7 THEN 'Sábado'
+           END
+         ORDER BY fecha DESC
+         LIMIT ?`,
+        [days]
+      );
+      
+      console.log('📈 Últimas ventas encontradas:', lastSales);
+      return lastSales.map(row => ({
+        dia: row.dia,
+        fecha: row.fecha,
+        total: Number(row.total) || 0,
+        cantidad_ventas: row.cantidad_ventas
+      }));
+    }
+    
+    return rows.map(row => ({
+      dia: row.dia,
+      fecha: row.fecha,
+      total: Number(row.total) || 0,
+      cantidad_ventas: row.cantidad_ventas
+    }));
+    
+  } catch (error) {
+    console.error('❌ Error en getSalesByDay:', error);
+    throw error;
+  }
+}
+
+// Obtener ventas de la semana anterior
+async function getSalesByDayPrevious() {
   const [rows] = await pool.query(
-    `SELECT DAYOFWEEK(fecha) as dia_num, SUM(total) as total FROM ventas
-     WHERE fecha >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
-       AND fecha < DATE_SUB(CURDATE(), INTERVAL ? DAY)
+    `SELECT 
+       DATE_FORMAT(fecha, '%Y-%m-%d') as fecha,
+       CASE DAYOFWEEK(fecha)
+         WHEN 1 THEN 'Domingo'
+         WHEN 2 THEN 'Lunes' 
+         WHEN 3 THEN 'Martes'
+         WHEN 4 THEN 'Miércoles'
+         WHEN 5 THEN 'Jueves'
+         WHEN 6 THEN 'Viernes'
+         WHEN 7 THEN 'Sábado'
+       END as dia,
+       SUM(total) as total 
+     FROM ventas
+     WHERE fecha >= DATE_SUB(CURDATE(), INTERVAL 14 DAY)
+       AND fecha < DATE_SUB(CURDATE(), INTERVAL 7 DAY)
        AND anulada = 0
-     GROUP BY dia_num`,
-    [startInterval, endInterval]
+     GROUP BY 
+       DATE(fecha),
+       DATE_FORMAT(fecha, '%Y-%m-%d'),
+       CASE DAYOFWEEK(fecha)
+         WHEN 1 THEN 'Domingo'
+         WHEN 2 THEN 'Lunes' 
+         WHEN 3 THEN 'Martes'
+         WHEN 4 THEN 'Miércoles'
+         WHEN 5 THEN 'Jueves'
+         WHEN 6 THEN 'Viernes'
+         WHEN 7 THEN 'Sábado'
+       END
+     ORDER BY fecha ASC`
   );
-  const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-  return diasSemana.map((dia, idx) => {
-    const diaNum = idx === 6 ? 1 : idx + 2;
-    const found = rows.find(r => Number(r.dia_num) === diaNum);
-    return { dia, total: found ? Number(found.total) : 0 };
-  });
+  
+  return rows.map(row => ({
+    dia: row.dia,
+    fecha: row.fecha,
+    total: Number(row.total) || 0
+  }));
 }
 
 // Obtener métodos de pago
@@ -101,7 +254,7 @@ async function createSale({ productos, cliente = '', user_id, metodo_pago, usuar
     // Insertar la venta principal
     const [insertResult] = await conn.query(
       `INSERT INTO ventas (cliente, fecha, subtotal, impuesto, total, user_id, metodo_pago)
-       VALUES (?, CURDATE(), ?, ?, ?, ?, ?)`,
+       VALUES (?, NOW(), ?, ?, ?, ?, ?)`,
       [cliente, subtotal, impuesto, total, user_id, metodo_pago]
     );
     const ventaId = insertResult.insertId;
@@ -182,7 +335,29 @@ async function cancelSale(id, motivo, user_id) {
   }
 }
 
-// Generar comprobante simulado
+// Obtener productos más vendidos
+async function getTopProducts(limit = 5) {
+  const [rows] = await pool.query(
+    `SELECT 
+      p.id,
+      p.name,
+      p.category,
+      p.image,
+      SUM(dv.cantidad) as cantidad_vendida,
+      SUM(dv.cantidad * dv.precio_unitario) as total_ingresos
+     FROM detalle_ventas dv
+     JOIN products p ON dv.producto_id = p.id
+     JOIN ventas v ON dv.venta_id = v.id
+     WHERE v.anulada = 0
+     GROUP BY p.id, p.name, p.category, p.image
+     ORDER BY cantidad_vendida DESC
+     LIMIT ?`,
+    [parseInt(limit)]
+  );
+  return rows;
+}
+
+// Generar comprobante
 async function generateComprobante(id) {
   const [ventaRows] = await pool.query('SELECT * FROM ventas WHERE id = ?', [id]);
   const [detalleRows] = await pool.query('SELECT * FROM detalle_ventas WHERE venta_id = ?', [id]);
@@ -206,10 +381,12 @@ module.exports = {
   getAllSalesWithProducts,
   getSalesResumen: getSalesSummary,
   getSalesByDay,
-  getVentasPorDia: () => getSalesByDay(7, 0),
+  getVentasPorDia: () => getSalesByDay(7),
+  getVentasPorDiaAnterior: getSalesByDayPrevious,
   getMetodosPago: getPaymentMethods,
   getSaleById,
   createVenta: createSale,
   anularVenta: cancelSale,
-  generarComprobante: generateComprobante
+  generarComprobante: generateComprobante,
+  getTopProducts
 };

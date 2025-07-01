@@ -1,290 +1,210 @@
-<style src="@/assets/css/mainview.css"></style>
 <template>
+  
   <div class="main-container">
-    <!-- Overlay para cerrar el sidebar en pantallas pequeñas -->
-    <div
-      v-if="isSidebarVisible && isSmallScreen"
-      class="overlay"
-      @click="closeSidebar"
-    ></div>
-
-    <!-- Sidebar de navegación principal -->
-    <aside :class="{ 'sidebar-hidden': !isSidebarVisible, 'sidebar-visible': isSidebarVisible }" class="sidebar">
-      <div class="sidebar-header">
-        <div class="sidebar-logo">
-          <i class="fas fa-cash-register"></i>
-          Sales System
+    
+    <!-- Sidebar -->
+    <Sidebar :visible="isSidebarVisible" :isSmallScreen="isSmallScreen" :role="currentUserRole" :userName="userName" :userImage="fullUserImage" @toggle="toggleSidebar" />
+    <!-- Contenedor de contenido principal -->
+    <div :class="['content-wrapper', { 'collapsed': !isSidebarVisible }]">
+      <AppBar
+        :title="pageTitle"
+        :theme="theme"
+        :notificationCount="notificationCount"
+        :fullUserImage="fullUserImage"
+        :userName="userName"
+        :isSidebarCollapsed="!isSidebarVisible"
+        @open-notifications="openNotifications"
+        @toggle-theme="toggleTheme"
+        @logout="logout"
+        @show-profile="showProfileModal = true"
+      />
+      <!-- Main Content -->
+      <div class="main-content">
+        <div class="dashboard-inner">
+          <router-view @set-title="setPageTitle"></router-view>
         </div>
       </div>
-      <div class="sidebar-user">
-        <img :src="userImage || defaultImage" alt="Foto del usuario" class="user-image" />
-        <span class="sidebar-username">{{ userName }}</span>
-        <span class="sidebar-role">{{ currentUserRole }}</span>
-      </div>
-      <nav class="sidebar-menu">
-        
-        <ul>
-          <!-- Escritorio: solo admin y supervisor -->
-          <li v-if="['admin', 'supervisor'].includes(currentUserRole)">
-            <router-link to="/main/dashboard"><i class="fas fa-home"></i> Escritorio</router-link>
-          </li>
-          <!-- Productos: admin, supervisor, almacenero -->
-          <li v-if="['admin', 'supervisor', 'almacenero'].includes(currentUserRole)">
-            <router-link to="/main/products"><i class="fas fa-box"></i> Productos</router-link>
-          </li>
-          <!-- Ventas: admin, supervisor, cajero -->
-          <li v-if="['admin', 'supervisor', 'cajero'].includes(currentUserRole)">
-            <router-link to="/main/sales">
-              <i class="fas fa-cash-register"></i> Ventas
-            </router-link>
-          </li>
-          <!-- Reportes: admin, supervisor -->
-          <li v-if="['admin', 'supervisor'].includes(currentUserRole)">
-            <router-link to="/main/reports"><i class="fas fa-chart-line"></i> Reportes</router-link>
-          </li>
-          <!-- Usuarios: solo admin -->
-          <li v-if="currentUserRole === 'admin'">
-            <router-link to="/main/users"><i class="fas fa-users"></i> Usuarios</router-link>
-          </li>
-        </ul>
-      </nav>
-    </aside>
-
-    <!-- Contenido principal -->
-    <div class="main-content">
-      <header class="app-bar">
-        <div class="left-section">
-          <!-- Botón para mostrar/ocultar sidebar -->
-          <button class="hamburger-btn" @click="toggleSidebar">
-            <i class="fas fa-bars"></i>
-          </button>
-          <!-- Título de la página -->
-          <span class="page-title">{{ pageTitle || 'Panel Principal' }}</span>
-        </div>
-        <div class="right-section">
-          <!-- Botón de notificaciones de stock bajo -->
-          <button class="notification-btn" @click="openNotifications">
-            <i class="fas fa-bell"></i>
-            <span v-if="notificationCount > 0" class="notification-badge">{{ notificationCount }}</span>
-          </button>
-          <!-- Botón para cambiar tema claro/oscuro -->
-          <div class="theme-toggle">
-            <i :class="theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun'" @click="toggleTheme"></i>
-          </div>
-          <!-- Menú desplegable de usuario -->
-          <div class="user-dropdown">
-  <img :src="userImage || defaultImage" class="user-avatar" />
-  <button @click="showProfileModal = true" class="user-name hover:underline">
-    {{ userName }}
-  </button>
-  <button @click="logout" class="logout-btn" title="Cerrar sesión">
-    <i class="fas fa-sign-out-alt"></i>
-  </button>
-  <UserProfileModal v-if="showProfileModal" @close="showProfileModal = false" />
-</div>
-
-        </div>
-      </header>
-      <div class="dashboard-inner">
-        <!-- Renderizado de las vistas hijas -->
-        <router-view @set-title="setPageTitle"></router-view>
-      </div>
-    </div>
-    <!-- Modal de inactividad por seguridad -->
-    <div v-if="showInactivityModal" class="inactivity-modal-bg">
-      <div class="inactivity-modal">
-        <h2>¿Sigues ahí?</h2>
-        <p>Por seguridad, tu sesión se cerrará pronto por inactividad.<br>
-        Haz clic en "Seguir aquí" para continuar.</p>
-        <button class="btn-primary" @click="confirmActivity">Seguir aquí</button>
-      </div>
     </div>
 
-    <!-- Modal de notificaciones de productos con bajo stock -->
-    <div v-if="showNotifications" class="notification-modal-bg" @click.self="showNotifications = false">
-      <div class="notification-modal">
-        <h3>Alertas de Bajo Stock</h3>
-        <ul v-if="lowStockProducts.length">
-          <li v-for="prod in lowStockProducts" :key="prod.id">
-            <button
-              class="low-stock-btn improved"
-              @click="goToEditProduct(prod.id)"
-            >
-              <span class="low-stock-icon">⚠️</span>
-              <span>
-                <strong>{{ prod.name }}</strong>
-                <span class="low-stock-details">— Stock: {{ prod.stock }} <span class="min">(mínimo: {{ prod.stock_min }})</span></span>
-              </span>
-            </button>
-          </li>
-        </ul>
-        <div v-else>
-          No hay productos con bajo stock.
-        </div>
-        <button class="btn-primary" @click="showNotifications = false">Cerrar</button>
-      </div>
-    </div>
+    <!-- Modals -->
+    <InactivityModal v-if="showInactivityModal" @continue="confirmActivity" />
+    <NotificationModal v-if="showNotifications" :visible="showNotifications" :lowStockProducts="lowStockProducts" @close="() => showNotifications = false" @edit="goToEditProduct" />
+    <UserProfileModal 
+      v-if="showProfileModal" 
+      @close="() => showProfileModal = false"
+      @profile-updated="onProfileUpdated"
+    />
 
-    <!-- Toast de notificación de bajo stock -->
-    <div v-if="toastVisible" class="low-stock-toast">
-      <i class="fas fa-exclamation-triangle"></i>
-      {{ toastMessage }}
-    </div>
-
-    <div v-if="toast.show" class="custom-toast">
-      {{ toast.message }}
-    </div>
+    <!-- Toasts -->
+    <ToastNotification :visible="toastVisible" :message="toastMessage" type="warning" icon="fas fa-exclamation-triangle" />
+    <ToastNotification :visible="toast.show" :message="toast.message" />
   </div>
+  
 </template>
 
 <script>
+import Sidebar from '@/components/layout/Sidebar.vue';
+import AppBar from '@/components/layout/AppBar.vue';
+import NotificationModal from '@/components/modals/NotificationModal.vue';
+import InactivityModal from '@/components/modals/InactivityModal.vue';
 import UserProfileModal from '@/components/UserProfileModal.vue';
-import defaultUserImage from '../assets/images/profile.png';
+import ToastNotification from '@/components/layout/ToastNotification.vue';
+import defaultUserImage from '@/assets/images/profile.png';
 import axios from 'axios';
+import api from '@/services/api';
 
 export default {
-  
-components: {
-  UserProfileModal
-},
+  components: {
+    Sidebar,
+    AppBar,
+    NotificationModal,
+    InactivityModal,
+    UserProfileModal,
+    ToastNotification
+  },
   data() {
     return {
-      // Estado del sidebar (visible/oculto)
-      isSidebarVisible: false,
-      // Nombre del usuario actual
+      isSidebarVisible: true,
       userName: '',
-      showProfileModal: false,
-      // Imagen del usuario actual
       userImage: '',
-      // Imagen predeterminada si el usuario no tiene foto
       defaultImage: defaultUserImage,
-      // Indica si la pantalla es pequeña (responsive)
       isSmallScreen: false,
-      // Número de notificaciones de bajo stock
       notificationCount: 3,
-      // Tema actual (light/dark)
       theme: 'light',
-      // Timers para control de inactividad
       inactivityTimer: null,
       warningTimer: null,
-      // Modal de inactividad visible
       showInactivityModal: false,
-      // Límites de tiempo para inactividad y advertencia (ms)
-      inactivityLimit: 10 * 60 * 1000, // 10 minutos
-      warningLimit: 5 * 60 * 1000, // 5 minutos
-      // Modal de notificaciones visible
+      inactivityLimit: 10 * 60 * 1000,
+      warningLimit: 5 * 60 * 1000,
       showNotifications: false,
-      // Lista de productos con bajo stock
       lowStockProducts: [],
-      notificationInterval: null, // <--- Agrega esta línea
+      notificationInterval: null,
       toastVisible: false,
       toastMessage: '',
       pageTitle: '',
+      showProfileModal: false,
       lastActivity: Date.now(),
       warningShown: false,
       logoutTimer: null,
       toast: {
         show: false,
         message: '',
-        timeout: null,
-      },
+        timeout: null
+      }
     };
   },
   computed: {
     currentUserRole() {
       return (localStorage.getItem('userRole') || '').toLowerCase();
+    },
+    fullUserImage() {
+      // Usar datos reactivos primero, luego localStorage como fallback
+      const image = this.userImage || localStorage.getItem('userImage');
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      
+      console.log('🔄 Generando fullUserImage:', { 
+        image, 
+        apiUrl, 
+        reactiveUserImage: this.userImage 
+      });
+      
+      if (!image || image === 'null' || image === 'undefined' || image === '') {
+        return this.defaultImage;
+      }
+      
+      // Si la imagen ya es una URL completa (http/https), usarla directamente
+      if (image.startsWith('http://') || image.startsWith('https://')) {
+        return image;
+      }
+      
+      // Si la imagen ya incluye /uploads/, construir URL completa
+      if (image.startsWith('/uploads/')) {
+        return `${apiUrl}${image}`;
+      }
+      
+      // Si es solo el nombre del archivo, añadir la ruta completa
+      return `${apiUrl}/uploads/${image}`;
     }
   },
   created() {
-    // Carga datos de usuario desde localStorage
+    // Cargar datos del usuario de localStorage
     this.userName = localStorage.getItem('userName') || 'Usuario';
     this.userImage = localStorage.getItem('userImage') || this.defaultImage;
-
-    // Configura el tamaño de pantalla y tema
+    
+    console.log('👤 Datos del usuario cargados en MainView:', {
+      userName: this.userName,
+      userImage: this.userImage,
+      fullUserImage: this.fullUserImage
+    });
+    
     this.checkScreenSize();
     window.addEventListener('resize', this.checkScreenSize);
-
     const savedTheme = localStorage.getItem('theme') || 'light';
     this.setTheme(savedTheme);
-
-    // Actualiza notificaciones de bajo stock al iniciar
     this.updateLowStockNotifications();
-
-    // Actualiza notificaciones cada 30 segundos
     this.notificationInterval = setInterval(this.updateLowStockNotifications, 30000);
   },
   mounted() {
     this.resetInactivityTimer();
-    window.addEventListener('mousemove', this.resetInactivityTimer);
-    window.addEventListener('keydown', this.resetInactivityTimer);
-    window.addEventListener('click', this.resetInactivityTimer);
-    this.activeCheckInterval = setInterval(() => {
-      this.updateUserActivity();
-    }, 60000);
-    // Agrega esta línea para verificar si el usuario sigue activo cada minuto
-    this.userActiveInterval = setInterval(() => {
-      this.checkUserActive();
-    }, 1000);
+    ['mousemove', 'keydown', 'click'].forEach(event => {
+      window.addEventListener(event, this.resetInactivityTimer);
+    });
+    this.activeCheckInterval = setInterval(this.updateUserActivity, 60000);
+    this.userActiveInterval = setInterval(this.checkUserActive, 1000);
   },
   beforeUnmount() {
-    window.removeEventListener('mousemove', this.resetInactivityTimer);
-    window.removeEventListener('keydown', this.resetInactivityTimer);
-    window.removeEventListener('click', this.resetInactivityTimer);
+    ['mousemove', 'keydown', 'click'].forEach(event => {
+      window.removeEventListener(event, this.resetInactivityTimer);
+    });
     clearTimeout(this.inactivityTimer);
     clearTimeout(this.warningTimer);
     clearInterval(this.notificationInterval);
     clearInterval(this.activeCheckInterval);
-    // Limpia también el nuevo intervalo
     clearInterval(this.userActiveInterval);
   },
   methods: {
-    // Muestra/oculta el sidebar
     toggleSidebar() {
       this.isSidebarVisible = !this.isSidebarVisible;
     },
-    // Cierra el sidebar
-    closeSidebar() {
-      this.isSidebarVisible = false;
+    checkScreenSize() {
+      const wasSmallScreen = this.isSmallScreen;
+      this.isSmallScreen = window.innerWidth <= 1024;
+      
+      // Solo cambiar el estado del sidebar si es la primera vez o si cambió el tipo de pantalla
+      if (wasSmallScreen !== this.isSmallScreen) {
+        if (this.isSmallScreen) {
+          // Al cambiar a pantalla pequeña, colapsar el sidebar
+          this.isSidebarVisible = false;
+        } else {
+          // Al cambiar a pantalla grande, expandir el sidebar
+          this.isSidebarVisible = true;
+        }
+      }
     },
-    // Cierra sesión y limpia datos de usuario
     async logout() {
       try {
         const token = localStorage.getItem('authToken');
         await axios.post('/api/users/logout', {}, {
           headers: { Authorization: `Bearer ${token}` }
         });
-      } catch (e) {
-        // Ignora error si ocurre
-      }
+      } catch (e) {}
       localStorage.clear();
       this.$router.push('/login');
     },
-    // Verifica si la pantalla es pequeña para responsive
-    checkScreenSize() {
-      this.isSmallScreen = window.innerWidth <= 1024;
-      if (!this.isSmallScreen) {
-        this.isSidebarVisible = true;
-      }
-    },
-    // Cambia el tema claro/oscuro
     toggleTheme() {
       const newTheme = this.theme === 'light' ? 'dark' : 'light';
       this.setTheme(newTheme);
     },
-    // Aplica el tema seleccionado
     setTheme(theme) {
       this.theme = theme;
       document.documentElement.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
     },
-    // Reinicia el temporizador de inactividad
     resetInactivityTimer() {
       clearTimeout(this.inactivityTimer);
       clearTimeout(this.warningTimer);
       this.startInactivityTimers();
-      if (this.showInactivityModal) {
-        this.showInactivityModal = false;
-      }
+      if (this.showInactivityModal) this.showInactivityModal = false;
     },
     startInactivityTimers() {
       this.warningTimer = setTimeout(() => {
@@ -296,32 +216,30 @@ components: {
         this.showToast('Sesión cerrada por inactividad.');
       }, this.inactivityLimit);
     },
-    // Confirma que el usuario sigue activo
     confirmActivity() {
       this.showInactivityModal = false;
       this.resetInactivityTimer();
     },
-    // Abre el modal de notificaciones y actualiza productos con bajo stock
     async openNotifications() {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
         const products = await res.json();
-        this.lowStockProducts = products.filter(p => p.stock <= p.stock_min);
+        this.lowStockProducts = Array.isArray(products) ? products.filter(p => p.stock <= p.stock_min) : [];
         this.notificationCount = this.lowStockProducts.length;
+        console.log('openNotifications called, lowStockProducts:', this.lowStockProducts);
         this.showNotifications = true;
       } catch (e) {
         this.lowStockProducts = [];
         this.notificationCount = 0;
         this.showNotifications = true;
+        console.error('Error fetching products:', e);
       }
     },
-    // Actualiza la lista de productos con bajo stock (sin mostrar modal)
     async updateLowStockNotifications() {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
         const products = await res.json();
         const lowStock = products.filter(p => p.stock <= p.stock_min);
-        // Mostrar toast solo si antes no había notificaciones y ahora sí
         if (this.notificationCount === 0 && lowStock.length > 0) {
           this.notificationCount = lowStock.length;
           this.lowStockProducts = lowStock;
@@ -335,15 +253,13 @@ components: {
         this.notificationCount = 0;
       }
     },
-    // Navega a la edición del producto seleccionado desde la notificación
     goToEditProduct(productId) {
       this.showNotifications = false;
-      this.$router.push({ 
-        path: '/main/products', 
+      this.$router.push({
+        path: '/main/products',
         query: { edit: productId }
       });
     },
-    // Muestra un toast de notificación de bajo stock
     showLowStockToast() {
       this.toastMessage = `¡Atención! Hay ${this.notificationCount} producto(s) con bajo stock.`;
       this.toastVisible = true;
@@ -351,7 +267,6 @@ components: {
         this.toastVisible = false;
       }, 4000);
     },
-    // Establece el título de la página
     setPageTitle(title) {
       this.pageTitle = title;
     },
@@ -360,30 +275,27 @@ components: {
         const userId = localStorage.getItem('userId');
         const token = localStorage.getItem('authToken');
         if (!userId || !token) return;
-        const res = await axios.get(`/api/users/${userId}/active`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get(`/users/${userId}/active`);
         if (res.data && res.data.active === false) {
           localStorage.clear();
           this.$router.push('/login');
           this.showToast('Tu usuario ha sido desactivado.');
         }
-        // Si está activo, no hagas nada
-      } catch (e) {
-        // Si hay error de red, NO cierres la sesión
-        // Opcional: puedes mostrar un mensaje pequeño o ignorar
-        // console.warn('No se pudo verificar el estado del usuario.');
+      } catch (error) {
+        // El interceptor de api.js ya maneja los errores 401/403 automáticamente
+        // Solo necesitamos manejar otros tipos de errores aquí si es necesario
+        console.log('Error al verificar estado del usuario:', error.message);
       }
     },
     async updateUserActivity() {
       try {
         const token = localStorage.getItem('authToken');
         if (!token) return;
-        await axios.post('/api/users/activity', {}, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      } catch (e) {
-        // Ignora errores de red
+        await api.post('/users/activity');
+      } catch (error) {
+        // El interceptor de api.js maneja automáticamente los errores 401/403
+        // Solo loggeamos para debugging, no necesitamos hacer nada más
+        console.log('Error al actualizar actividad del usuario:', error.message);
       }
     },
     showToast(message, duration = 3000) {
@@ -394,6 +306,99 @@ components: {
         this.toast.show = false;
       }, duration);
     },
-  },
+    onProfileUpdated(updatedUserData) {
+      console.log('🔄 Actualizando datos del usuario en MainView:', updatedUserData);
+      
+      // Actualizar los datos reactivos del usuario
+      if (updatedUserData.name) {
+        this.userName = updatedUserData.name;
+        localStorage.setItem('userName', updatedUserData.name);
+      }
+      
+      if (updatedUserData.image) {
+        // Si el backend devuelve una URL completa, extraer solo la parte relativa para localStorage
+        let imageToStore = updatedUserData.image;
+        if (imageToStore.startsWith('http')) {
+          const urlParts = imageToStore.split('/uploads/');
+          if (urlParts.length > 1) {
+            imageToStore = `/uploads/${urlParts[1]}`;
+          }
+        }
+        
+        this.userImage = imageToStore;
+        localStorage.setItem('userImage', imageToStore);
+        
+        console.log('🖼️ Imagen actualizada:', {
+          original: updatedUserData.image,
+          stored: imageToStore,
+          computed: this.fullUserImage
+        });
+      }
+      
+      // Forzar la actualización del computed fullUserImage
+      this.$nextTick(() => {
+        this.$forceUpdate();
+      });
+      
+      // Mostrar notificación de éxito
+      this.showToast('Perfil actualizado correctamente', 3000);
+    }
+  }
 };
 </script>
+
+<style scoped>
+.main-container {
+  min-height: 100vh;
+  width: 100vw;
+  background: none;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  overflow-x: hidden;
+}
+.content-wrapper.collapsed {
+  margin-left: 80px; /* Ancho colapsado del sidebar */
+}
+
+@media (max-width: 1024px) {
+  .content-wrapper.collapsed {
+    margin-left: 80px; /* En pantallas pequeñas, mantener margen cuando está colapsado */
+  }
+}
+
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin-left: 260px;
+  transition: margin-left 0.3s ease;
+}
+
+@media (max-width: 900px) {
+  .main-content {
+    padding: 16px 6px 12px 6px;
+  }
+}
+
+.main-content {
+  flex: 1;
+  padding: 32px 24px 24px 24px;
+  min-height: 0;
+  background: none;
+  display: flex;
+  flex-direction: column;
+  transition: background 0.2s;
+}
+
+.dashboard-inner {
+  width: 100%;
+  max-width: 100vw;
+  margin: 0;
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+}
+</style>
