@@ -1,8 +1,34 @@
 const pool = require('../config/db');
 
+// Helper function to format image URLs
+const formatImageUrl = (imageUrl) => {
+  if (!imageUrl) return null;
+  
+  // If it's already a full URL (Azure or other), return as is
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl;
+  }
+  
+  // If it's a relative path, convert to local URL
+  if (imageUrl.startsWith('/uploads/')) {
+    return `http://localhost:${process.env.PORT || 5000}${imageUrl}`;
+  }
+  
+  // If it's just a filename, add the uploads prefix
+  if (!imageUrl.startsWith('/')) {
+    return `http://localhost:${process.env.PORT || 5000}/uploads/${imageUrl}`;
+  }
+  
+  return imageUrl;
+};
+
 const getAll = async () => {
   const [products] = await pool.query('SELECT * FROM products WHERE activo = 1');
-  return products.map(p => ({ ...p, low_stock: Number(p.stock) <= Number(p.stock_min) }));
+  return products.map(p => ({ 
+    ...p, 
+    low_stock: Number(p.stock) <= Number(p.stock_min),
+    image: formatImageUrl(p.image)
+  }));
 };
 
 const getDestacados = async () => {
@@ -41,7 +67,10 @@ const softDelete = async (id) => {
 
 const getByFilter = async (field, value) => {
   const [rows] = await pool.query(`SELECT * FROM products WHERE ${field} = ? AND activo = 1`, [value]);
-  return rows;
+  return rows.map(p => ({
+    ...p,
+    image: formatImageUrl(p.image)
+  }));
 };
 
 module.exports = {

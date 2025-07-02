@@ -21,7 +21,8 @@ const getDestacados = async (req, res) => {
 
 const add = async (req, res) => {
   try {
-    const image = req.file ? `/uploads/${req.file.filename}` : null;
+    // La URL de la imagen viene del middleware de Azure o local
+    const image = req.file ? (req.file.url || `/uploads/${req.file.filename}`) : null;
     const {
       name, description, price, purchase_price, category,
       marca, unidad_medida, stock, stock_min, stock_max
@@ -39,7 +40,7 @@ const add = async (req, res) => {
     const usuario = req.user?.nombre || req.user?.correo_electronico || 'Desconocido';
     await pool.query('INSERT INTO activities (descripcion, usuario) VALUES (?, ?)', [`Producto agregado: ${name}`, usuario]);
 
-    res.status(201).json({ id, name });
+    res.status(201).json({ id, name, image });
   } catch (error) {
     res.status(500).json({ message: 'Error al agregar producto' });
   }
@@ -48,11 +49,14 @@ const add = async (req, res) => {
 const update = async (req, res) => {
   try {
     const data = { ...req.body };
-    if (req.file) data.image = `/uploads/${req.file.filename}`;
+    // La URL de la imagen viene del middleware de Azure o local
+    if (req.file) {
+      data.image = req.file.url || `/uploads/${req.file.filename}`;
+    }
     await productService.updateProduct(req.params.id, data);
     const usuario = req.user?.nombre || req.user?.correo_electronico || 'Desconocido';
     await pool.query('INSERT INTO activities (descripcion, usuario) VALUES (?, ?)', [`Producto actualizado: ${req.body.name}`, usuario]);
-    res.status(200).json({ message: 'Producto actualizado' });
+    res.status(200).json({ message: 'Producto actualizado', image: data.image });
   } catch {
     res.status(500).json({ message: 'Error al actualizar producto' });
   }

@@ -117,23 +117,22 @@ const updateUserProfile = async (req, res) => {
     const { id } = req.params;
     const { name, email } = req.body;
 
-    let imagePath = null;
+    let imageUrl = null;
     if (req.file) {
-      imagePath = `/uploads/${req.file.filename}`;
+      // Si viene de Azure Blob Storage, req.file.url tendrá la URL completa
+      imageUrl = req.file.url || `/uploads/${req.file.filename}`;
     }
 
     await pool.query(
       'UPDATE users SET nombre = ?, correo_electronico = ?, imagen = ? WHERE id = ?',
-      [name, email, imagePath || null, id]
+      [name, email, imageUrl || null, id]
     );
     
     res.json({
       success: true,
       name,
       email,
-      image: imagePath
-        ? `http://localhost:${process.env.PORT || 3001}${imagePath}`
-        : null
+      image: imageUrl
     });
 
   } catch (err) {

@@ -107,6 +107,8 @@
               :src="product.image || defaultProductImg"
               alt="Imagen del producto"
               class="product-image"
+              @error="handleImageError"
+              @load="handleImageLoad"
             />
             <div class="product-overlay">
               <button @click="editProduct(product)" class="overlay-btn edit" title="Editar producto">
@@ -197,7 +199,13 @@
             :class="{ 'low-stock': product.low_stock }"
           >
             <td>
-              <img :src="product.image || defaultProductImg" alt="Imagen" class="table-product-image" />
+              <img 
+                :src="product.image || defaultProductImg" 
+                alt="Imagen" 
+                class="table-product-image"
+                @error="handleImageError"
+                @load="handleImageLoad"
+              />
             </td>
             <td>{{ product.name }}</td>
             <td>{{ product.description }}</td>
@@ -600,14 +608,30 @@ export default {
       this.loading = true;
       try {
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/products`);
-        this.products = response.data.map((product) => ({
-          ...product,
-          image: product.image
-            ? (product.image.startsWith('/uploads/')
-                ? `${import.meta.env.VITE_API_URL}${product.image}`
-                : product.image)
-            : defaultProductImg,
-        }));
+        console.log('🔍 Datos recibidos del backend:', response.data);
+        console.log('🔧 VITE_API_URL:', import.meta.env.VITE_API_URL);
+        
+        // Ya no es necesario procesar las URLs aquí porque el backend las devuelve correctas
+        this.products = response.data.map((product) => {
+          // Si no hay imagen, usar la imagen por defecto
+          const imageUrl = product.image || defaultProductImg;
+            
+          console.log(`📷 Producto "${product.name}":`, {
+            id: product.id,
+            originalImage: product.image,
+            finalImageUrl: imageUrl,
+            imageType: product.image ? (
+              product.image.startsWith('https://') ? 'Azure Blob Storage' :
+              product.image.startsWith('http://localhost') ? 'Local Server' : 'Other'
+            ) : 'Sin imagen - usando default'
+          });
+          
+          return {
+            ...product,
+            image: imageUrl
+          };
+        });
+        
         this.categories = [...new Set(response.data.map((product) => product.category))];
       } catch (error) {
         console.error('Error al obtener los productos:', error);
@@ -715,9 +739,8 @@ export default {
 
         // Agregar el producto a la lista local
         const product = response.data;
-        product.image = product.image && product.image.startsWith('/uploads/')
-          ? `${import.meta.env.VITE_API_URL}${product.image}`
-          : (product.image || defaultProductImg);
+        // El backend ya devuelve la URL correcta (Azure o local)
+        product.image = product.image || defaultProductImg;
         this.products.push(product);
         this.closeAddProductModal();
       } catch (error) {
@@ -916,6 +939,16 @@ export default {
         };
         reader.readAsDataURL(file);
       }
+    },
+    
+    // Manejadores de eventos para debug de imágenes
+    handleImageError(event) {
+      console.error('❌ Error cargando imagen:', event.target.src);
+      event.target.src = defaultProductImg;
+    },
+    
+    handleImageLoad(event) {
+      console.log('✅ Imagen cargada correctamente:', event.target.src);
     },
   },
   mounted() {

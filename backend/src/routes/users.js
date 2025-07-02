@@ -4,20 +4,7 @@ const router = express.Router();
 const authenticate = require('../middleware/authenticate');
 const authorizeRole = require('../middleware/authorizeRole');
 const userController = require('../controllers/userController');
-const multer = require('multer');
-const path = require('path');
-
-// Configuración de multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../../uploads'));
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `user_${Date.now()}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  }
-});
-const upload = multer({ storage });
+const { uploadSingle } = require('../middleware/azureUpload');
 
 // Rutas
 router.get('/', authenticate, authorizeRole('admin', 'supervisor'), userController.getAllUsers);
@@ -25,7 +12,7 @@ router.get('/activos', authenticate, authorizeRole('admin', 'supervisor'), userC
 router.get('/stats/activos', userController.getActiveUserCount); // Versión pública para dashboard
 router.post('/verify-password', authenticate, userController.verifyPassword);
 
-router.put('/:id/profile', authenticate, upload.single('image'), userController.updateUserProfile); // ✅ SOLO ESTA
+router.put('/:id/profile', authenticate, uploadSingle('image', 'users'), userController.updateUserProfile);
 
 router.put('/:id', authenticate, authorizeRole('admin'), userController.updateUserRole);
 router.delete('/:id', authenticate, authorizeRole('admin'), userController.deleteUser);
