@@ -47,13 +47,6 @@ async function getSalesByDay(days = 7) {
               SUM(total) as suma_total
        FROM ventas WHERE anulada = 0`
     );
-    
-    console.log('� Estadísticas generales:', {
-      totalVentas: totalVentas[0].total,
-      fechaMin: totalVentas[0].fecha_min,
-      fechaMax: totalVentas[0].fecha_max,
-      sumaTotal: totalVentas[0].suma_total
-    });
 
     // Consulta simplificada para ver todas las ventas recientes
     const [ventasRecientes] = await pool.query(
@@ -68,8 +61,6 @@ async function getSalesByDay(days = 7) {
        ORDER BY fecha DESC 
        LIMIT 10`
     );
-    
-    console.log('📊 Ventas recientes (muestra):', ventasRecientes);
 
     // Ahora la consulta principal con formato de fecha corregido
     const [rows] = await pool.query(
@@ -105,11 +96,8 @@ async function getSalesByDay(days = 7) {
       [days]
     );
     
-    console.log('📈 Resultado consulta principal:', rows);
-    
     // Si no hay datos en el rango específico, mostrar las últimas ventas agrupadas por día
     if (rows.length === 0) {
-      console.log('⚠️ No hay ventas en los últimos', days, 'días, obteniendo últimas ventas...');
       
       const [lastSales] = await pool.query(
         `SELECT 
@@ -144,7 +132,6 @@ async function getSalesByDay(days = 7) {
         [days]
       );
       
-      console.log('📈 Últimas ventas encontradas:', lastSales);
       return lastSales.map(row => ({
         dia: row.dia,
         fecha: row.fecha,

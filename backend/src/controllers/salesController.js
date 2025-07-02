@@ -47,7 +47,6 @@ exports.getVentasPorDiaAnterior = async (req, res) => {
 
 exports.testVentasPorDia = async (req, res) => {
   try {
-    console.log('🔍 Iniciando test de ventas por día...');
     
     // Primero verificar si hay ventas en la DB
     const pool = require('../config/db');
@@ -62,13 +61,8 @@ exports.testVentasPorDia = async (req, res) => {
     const [sampleData] = await pool.query('SELECT * FROM ventas WHERE anulada = 0 ORDER BY fecha DESC LIMIT 5');
     
     console.log('📊 Total ventas en DB:', totalVentas[0].total);
-    console.log('📊 Ventas activas:', ventasActivas[0].total);
-    console.log('📊 Ventas últimos 30 días:', ventasRecientes[0].total);
-    console.log('🏗️ Estructura tabla ventas:', tableStructure);
-    console.log('📋 Muestra de datos:', sampleData);
     
     const data = await salesService.getVentasPorDia();
-    console.log('🔍 Resultado de getVentasPorDia:', data);
     
     res.json({
       success: true,

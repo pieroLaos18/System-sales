@@ -16,7 +16,6 @@ const createActivitiesTable = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    console.log('✅ Tabla activities verificada/creada');
     
     // Verificar si las columnas necesarias existen, si no, agregarlas
     try {
@@ -25,8 +24,6 @@ const createActivitiesTable = async () => {
       if (tipoColumns.length === 0) {
         await pool.query(`ALTER TABLE activities ADD COLUMN tipo VARCHAR(50) AFTER usuario`);
         console.log('✅ Columna tipo agregada');
-      } else {
-        console.log('✅ Columna tipo ya existe');
       }
 
       // Verificar columna 'detalles'
@@ -34,8 +31,6 @@ const createActivitiesTable = async () => {
       if (detallesColumns.length === 0) {
         await pool.query(`ALTER TABLE activities ADD COLUMN detalles TEXT AFTER tipo`);
         console.log('✅ Columna detalles agregada');
-      } else {
-        console.log('✅ Columna detalles ya existe');
       }
 
       // Verificar columna 'created_at'
@@ -43,8 +38,6 @@ const createActivitiesTable = async () => {
       if (createdAtColumns.length === 0) {
         await pool.query(`ALTER TABLE activities ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
         console.log('✅ Columna created_at agregada');
-      } else {
-        console.log('✅ Columna created_at ya existe');
       }
 
     } catch (alterError) {
